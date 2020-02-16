@@ -8,11 +8,11 @@
     <script src="jquery.min.js"></script>
     <script src="bootstrap.min.js"></script>
     <?php
-        if(isset($_COOKIE["validate"]))
-        {
-            unset($_COOKIE['validate']);
-            setcookie("validate", null, -1, "/newtaipei");
-        }
+        // if(isset($_COOKIE["validate"]))
+        // {
+        //     unset($_COOKIE['validate']);
+        //     setcookie("validate", null, -1, "/newtaipei");
+        // }
         if(!isset($_COOKIE["max_temperature"]))
             setcookie("max_temperature", 38);
         if(!isset($_COOKIE["temperature_gain"]))
@@ -27,6 +27,132 @@
             margin-bottom: 0px;
             z-index: 1000;
         }
+.checki {
+    display: none;
+}
+
+.dot {
+    position: relative;
+
+    transform: rotate(180deg);
+
+    display: block;
+
+    width: 60px;
+    height: 30px;
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    background-color: #14a83b;
+}
+
+.checki:checked + .dot {
+    background-color: white;
+}
+
+.dot:before {
+    content: '';
+
+    position: absolute;
+    left: 20px;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    animation: close-animation 2s forwards;
+}
+
+@keyframes close-animation {
+    from {
+        width: 0;
+        height: 0;
+
+        background-color: white;
+    }
+
+    to {
+        width: 200px;
+        height: 200px;
+
+        background-color: white;
+    }
+}
+
+.dot:after {
+    content: '';
+
+    position: absolute;
+    left: calc(100% - 25px);
+    top: 50%;
+
+    transform: translateY(-50%) scale(0);
+
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    z-index: 1;
+
+    background-color: #14a83b;
+
+    transition-delay: .5s;
+
+    animation: scale-animation .5s forwards;
+    animation-delay: .5s;
+}
+
+@keyframes scale-animation {
+    from {
+        transform: translateY(-50%) scale(0);
+    }
+
+    to {
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+.checki:checked + .dot:before {
+    left: calc(100% - 20px);
+
+    animation: open-animation 2s forwards;
+}
+
+@keyframes open-animation {
+    from {
+        width: 0;
+        height: 0;
+
+        background-color: #14a83b;
+    }
+
+    to {
+        width: 200px;
+        height: 200px;
+
+        background-color: #14a83b;
+    }
+}
+
+.checki:checked + .dot:after {
+    left: 15px;
+
+    background-color: white;
+
+    animation: scale-2-animation .5s forwards;
+    animation-delay: .5s;
+}
+
+@keyframes scale-2-animation {
+    from {
+        transform: translateY(-50%) scale(0);
+    }
+
+    to {
+        transform: translateY(-50%) scale(1);
+    }
+}
     </style>
 </head>
 <body style="background-color:#3F3F3F!important;" onload="init()">
@@ -83,11 +209,21 @@
                             </div>
                         </div>
                     </div>
-                    <div class="input-group justify-content-center">
-                        <input type="text" name="" class="p-2" placeholder="輸入密碼" id="sendtext">
-                        <div class="input-group-append">
-                            <input type="button" id="sendbutton" value="進入進階模式" class="btn btn-outline-light">
+                    <div class="row">
+                        <div class="input-group justify-content-center">
+                            <input type="text" name="" class="p-2" placeholder="輸入密碼" id="sendtext">
+                            <div class="input-group-append">
+                                <input type="button" id="sendbutton" value="進入進階模式" class="btn btn-outline-light">
+                            </div>
+                            <div class="ml-3 mt-3">
+                                <label>
+                                    <input class="btn-toggle checki" type="checkbox">
+                                    <i class="dot"></i>
+                                </label>
+                                <span class="text-white">發燒紀錄</span>
+                            </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -114,6 +250,7 @@
         let play = true;
         let audio;
         let opening = false;
+        let hotdetail = false;
         function init(){
             audio = document.getElementById("audioi");
             audio.addEventListener('ended', loopAudio, false);
@@ -133,10 +270,20 @@
             setInterval(() => {
                 if(opening)
                 {
-                    $.get("query.php", 
-                    function(data) {
-                        $("tbody").html(data);
-                    })
+                    if(hotdetail) 
+                    {
+                        $.get("query2.php", 
+                        function(data) {
+                            $("tbody").html(data);
+                        })
+                    }
+                    else
+                    {
+                        $.get("query.php", 
+                        function(data) {
+                            $("tbody").html(data);
+                        })
+                    }
                     $.get("send.php", 
                     function(data) {
                         if(play && data == "1")
@@ -149,6 +296,9 @@
                     })
                 }
             }, 1000);
+            $(".checki").change(function(){
+                hotdetail = $(".checki").prop("checked");
+            })
             $("#max_change").click(function(){
                 $.get("change1.php", {value: $("#max_temperature").val()});
             })
