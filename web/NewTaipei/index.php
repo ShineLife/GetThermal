@@ -13,6 +13,10 @@
             unset($_COOKIE['validate']);
             setcookie("validate", null, -1, "/newtaipei");
         }
+        if(!isset($_COOKIE["max_temperature"]))
+            setcookie("max_temperature", 38);
+        if(!isset($_COOKIE["temperature_gain"]))
+            setcookie("temperature_gain", 0);
     ?>
     <style>
         #init {
@@ -64,19 +68,25 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text">溫度限制</span>
                             </div>
-                            <input type="number" name="" value="38" id="max_temperature">
+                            <input type="number" name="" value="<?=isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38'?>" id="max_temperature">
+                            <div class="input-group-append">
+                                <input type="button" value="修改" id="max_change">
+                            </div>
                         </div>
                         <div class="input-group justify-content-center mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">溫度補償</span>
                             </div>
-                            <input type="number" name="" value="0" id="temperature_gain">
+                            <input type="number" name="" value="<?=isset($_COOKIE["temperature_gain"]) ? $_COOKIE["temperature_gain"] : '0'?>" id="temperature_gain">
+                            <div class="input-group-append">
+                                <input type="button" value="修改" id="gain_change">
+                            </div>
                         </div>
                     </div>
                     <div class="input-group justify-content-center">
-                        <input type="text" name="" placeholder="輸入密碼" id="sendtext">
+                        <input type="text" name="" class="p-2" placeholder="輸入密碼" id="sendtext">
                         <div class="input-group-append">
-                            <input type="button" id="sendbutton" value="進入進階" class="btn btn-outline-light">
+                            <input type="button" id="sendbutton" value="進入進階模式" class="btn btn-outline-light">
                         </div>
                     </div>
                 </div>
@@ -124,18 +134,10 @@
                 if(opening)
                 {
                     $.get("query.php", 
-                    {
-                        max_temperature: $("#max_temperature").val() == "" ? 38 : $("#max_temperature").val(), 
-                        temperature_gain: $("#temperature_gain").val() == "" ? 0 : $("#temperature_gain").val()
-                    }, 
                     function(data) {
                         $("tbody").html(data);
                     })
                     $.get("send.php", 
-                    {
-                        max_temperature: $("#max_temperature").val() == "" ? 38 : $("#max_temperature").val(), 
-                        temperature_gain: $("#temperature_gain").val() == "" ? 0 : $("#temperature_gain").val()
-                    }, 
                     function(data) {
                         if(play && data == "1")
                         {
@@ -147,6 +149,12 @@
                     })
                 }
             }, 1000);
+            $("#max_change").click(function(){
+                $.get("change1.php", {value: $("#max_temperature").val()});
+            })
+            $("#gain_change").click(function(){
+                $.get("change2.php", {value: $("#temperature_gain").val()});
+            })
             $("#disbutton").click(function () {
                 audio.play();
             })
@@ -155,7 +163,13 @@
                 audio.pause();
             })
             $("#sendbutton").click(function () {
-                $.get("login.php", {password:$("#sendtext").val()});
+                $.get("login.php", {password:$("#sendtext").val()}, function(data) {
+                    if(data == "1234")
+                    {
+                        $("#sendbutton").hide();
+                        $("#sendtext").hide();
+                    }
+                });
             })
         })
     </script>
