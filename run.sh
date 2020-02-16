@@ -1,2 +1,3 @@
 #!/bin/bash
-cp -a /update/GetThermal/web/NewTaipei/ /var/www/html/
+cp -a html/ /var/www/
+cp GetThermal /usr/sbin/
