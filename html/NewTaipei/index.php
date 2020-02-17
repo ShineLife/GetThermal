@@ -8,15 +8,15 @@
     <script src="jquery.min.js"></script>
     <script src="bootstrap.min.js"></script>
     <?php
-        // if(isset($_COOKIE["validate"]))
-        // {
-        //     unset($_COOKIE['validate']);
-        //     setcookie("validate", null, -1, "/newtaipei");
-        // }
-        if(!isset($_COOKIE["max_temperature"]))
+    session_start();
+//         if(isset($_COOKIE["validate"]))
+//         {
+//             unset($_COOKIE['validate']);
+//             setcookie("validate", null, -1, "/newtaipei");
+//         }
             setcookie("max_temperature", 38);
-        if(!isset($_COOKIE["temperature_gain"]))
             setcookie("temperature_gain", 0);
+            setcookie("temperature_row", 5);
     ?>
     <style>
         #init {
@@ -156,7 +156,7 @@
     </style>
 </head>
 <body style="background-color:#3F3F3F!important;" onload="init()">
-    <div class="modal" id="modal2" tabindex="-1" role="dialog">
+    <!-- <div class="modal" id="modal2" tabindex="-1" role="dialog">
         <div class="modal-dialog" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 90%;" role="document">
             <div class="modal-content">
                 <div class="modal-body text-center">
@@ -167,7 +167,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <div class="modal fade-modal" id="123" tabindex="-1" role="dialog">
         <div class="modal-dialog" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 90%;" role="document">
             <div class="modal-content">
@@ -194,7 +194,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text">溫度限制</span>
                             </div>
-                            <input type="number" name="" value="<?=isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38'?>" id="max_temperature">
+                            <input type="number" name="" value="<?='38'?>" id="max_temperature">
                             <div class="input-group-append">
                                 <input type="button" value="修改" id="max_change">
                             </div>
@@ -203,20 +203,35 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text">溫度補償</span>
                             </div>
-                            <input type="number" name="" value="<?=isset($_COOKIE["temperature_gain"]) ? $_COOKIE["temperature_gain"] : '0'?>" id="temperature_gain">
+                            <input type="number" name="" value="<?='0'?>" id="temperature_gain">
                             <div class="input-group-append">
                                 <input type="button" value="修改" id="gain_change">
+                            </div>
+                        </div>
+                        <div class="input-group justify-content-center mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">顯示數量</span>
+                            </div>
+                            <input type="number" name="" value="<?='5'?>" id="temperature_row">
+                            <div class="input-group-append">
+                                <input type="button" value="修改" id="row_change">
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="input-group justify-content-center">
-                            <input type="text" name="" class="p-2" placeholder="輸入密碼" id="sendtext">
-                            <div class="input-group-append">
-                                <input type="button" id="sendbutton" value="進入進階模式" class="btn btn-outline-light">
-                            </div>
-                            <div class="ml-3 mt-3">
-                                <label>
+                            <?php
+                            if(!(isset($_SESSION["validate"]) && $_SESSION["validate"])) {
+                                ?>
+                                <input type="text" name="" class="p-2" placeholder="輸入密碼" id="sendtext">
+                                <div class="input-group-append">
+                                    <input type="button" id="sendbutton" value="進入進階模式" class="btn btn-outline-light">
+                                </div>
+                                <?php
+                            }
+                            ?>
+                            <div class="ml-3 mt-3 ">
+                                <label style="margin-top: 5px;">
                                     <input class="btn-toggle checki" type="checkbox">
                                     <i class="dot"></i>
                                 </label>
@@ -247,7 +262,6 @@
         <input type="button" value="" id="disbutton" style="display: none;">
     </div>
     <script>
-        let play = true;
         let audio;
         let opening = false;
         let hotdetail = false;
@@ -267,6 +281,9 @@
         });
         $(function(){
             $("#123").modal();
+            $('#123').on('hidden.bs.modal', function (e) {
+                opening = true;
+            })
             setInterval(() => {
                 if(opening)
                 {
@@ -286,12 +303,16 @@
                     }
                     $.get("send.php", 
                     function(data) {
-                        if(play && data == "1")
+                        if(data == "1")
                         {
-                            play = false;
                             $("#disbutton").trigger("click");
-                            audio.play();
-                            $("#modal2").modal();
+                            if(audio.paused)
+                                audio.play();
+                        }
+                        else
+                        {
+                            if(!audio.paused)
+                                audio.pause();
                         }
                     })
                 }
@@ -304,6 +325,9 @@
             })
             $("#gain_change").click(function(){
                 $.get("change2.php", {value: $("#temperature_gain").val()});
+            })
+            $("#row_change").click(function(){
+                $.get("change3.php", {value: $("#temperature_row").val()});
             })
             $("#disbutton").click(function () {
                 audio.play();

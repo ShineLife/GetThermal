@@ -1,5 +1,6 @@
 <?php
-    if($_GET["password"] == "123456") {
-        setcookie("validate", true);
+session_start();
+    if($_GET["password"] == "2020nt") {
+        $_SESSION["validate"] = true;
         echo "1234";
     }
