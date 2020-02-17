@@ -1,3 +1,3 @@
 #!/bin/bash
-cp -a html/ /var/www/
-cp GetThermal /usr/sbin/
+mysql -u root -e "use temperature;DROP table temperature;"
+mysql -u root temperature < /udoate/GetThermal/temperature.sql
