@@ -1,0 +1,6 @@
+CREATE TABLE `temperature` (  `id` int(11) NOT NULL,  `value` double NOT NULL,  `date` datetime NOT NULL DEFAULT current_timestamp(),  `image` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+ALTER TABLE `temperature`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `temperatures`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6763;
