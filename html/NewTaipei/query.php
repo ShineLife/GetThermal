@@ -1,6 +1,6 @@
 <?php
      include("sql.php");
-    $datas = $sql->query("SELECT `date`, max(`value`) as `value`, image FROM `temperature` GROUP BY `date` ORDER BY `id` DESC limit ". $_COOKIE["temperature_row"])->fetchAll();
+    $datas = $sql->query("SELECT `id`,`date`, max(`value`) as `value`, image FROM `temperature` GROUP BY `date` ORDER BY `id` DESC limit ". $_COOKIE["temperature_row"])->fetchAll();
     foreach($datas as $data) {
         $data["value"] = floatval($data["value"]) + floatval(isset($_COOKIE["temperature_gain"]) ? $_COOKIE["temperature_gain"] : '0');
     ?>
@@ -11,7 +11,7 @@
             <?php
                 if($data["value"] >= (isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38')){
             ?>
-                <img <?=isset($_SESSION["validate"]) && $_SESSION["validate"] ? "" : "hidden"?> src="data:image/jpeg;base64, <?=$data["image"]?>" style="width: 70%;height: auto;" alt="">
+                <img <?=isset($_SESSION["validate"]) && $_SESSION["validate"] ? "" : "hidden"?> id="image<?=$data['id']?>" onclick="ShowImage('image<?=$data['id']?>')" src="data:image/jpeg;base64, <?=$data["image"]?>" style="width: 70%;height: auto;" alt="">
             <?php
                 }
             ?>
@@ -20,3 +20,9 @@
     <?php
     }
 ?>
+<script>
+    function ShowImage(id){
+        $("#imageModal").modal();
+        $("#modal_image").attr("src", $("#" + id).attr("src"));
+    }
+</script>

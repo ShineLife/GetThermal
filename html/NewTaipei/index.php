@@ -156,18 +156,6 @@
     </style>
 </head>
 <body style="background-color:#3F3F3F!important;" onload="init()">
-    <!-- <div class="modal" id="modal2" tabindex="-1" role="dialog">
-        <div class="modal-dialog" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 90%;" role="document">
-            <div class="modal-content">
-                <div class="modal-body text-center">
-                    <p style="font-size:24px;">有人體溫過高</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary mx-auto" data-dismiss="modal">關閉音效</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
     <div class="modal fade-modal" id="123" tabindex="-1" role="dialog">
         <div class="modal-dialog" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 90%;" role="document">
             <div class="modal-content">
@@ -176,6 +164,15 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary mx-auto" data-dismiss="modal" onclick="opening = true;">開啟音效</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade-modal" id="imageModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 90%;" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img src="" alt="" id="modal_image" style="width:100%;height:auto;">
                 </div>
             </div>
         </div>
@@ -240,6 +237,10 @@
                         </div>
                         
                     </div>
+                    <div id="modal2">
+                        <p style="font-size:24px;" class="text-white">有人體溫過高</p>
+                        <button type="button" class="btn btn-primary mx-auto" id="closeModal">關閉音效</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -280,6 +281,7 @@
             document.getElementsByTagName('audio')[0].pause();
         });
         $(function(){
+            $("#modal2").hide();
             $("#123").modal();
             $('#123').on('hidden.bs.modal', function (e) {
                 opening = true;
@@ -287,11 +289,12 @@
             setInterval(() => {
                 if(opening)
                 {
-                    if(hotdetail) 
+                    if(hotdetail)
                     {
                         $.get("query2.php", 
                         function(data) {
                             $("tbody").html(data);
+                            console.log(hotdetail);
                         })
                     }
                     else
@@ -299,24 +302,21 @@
                         $.get("query.php", 
                         function(data) {
                             $("tbody").html(data);
+                            console.log(hotdetail);
                         })
                     }
                     $.get("send.php", 
                     function(data) {
                         if(data == "1")
                         {
+                            $("#modal2").show();
                             $("#disbutton").trigger("click");
                             if(audio.paused)
                                 audio.play();
                         }
-                        else
-                        {
-                            if(!audio.paused)
-                                audio.pause();
-                        }
                     })
                 }
-            }, 1000);
+            }, 500);
             $(".checki").change(function(){
                 hotdetail = $(".checki").prop("checked");
             })
@@ -332,10 +332,12 @@
             $("#disbutton").click(function () {
                 audio.play();
             })
-            $('#modal2').on('hidden.bs.modal', function (e) {
+            $('#closeModal').click(function (e) {
+                $("#modal2").hide();
                 play = true;
                 audio.pause();
             })
+
             $("#sendbutton").click(function () {
                 $.get("login.php", {password:$("#sendtext").val()}, function(data) {
                     if(data == "1234")
