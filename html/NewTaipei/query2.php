@@ -4,7 +4,7 @@
     foreach($datas as $data) {
         $data["value"] = floatval($data["value"]) + floatval(isset($_COOKIE["temperature_gain"]) ? $_COOKIE["temperature_gain"] : '0');
     ?>
-        <tr>
+        <tr <?=$data["value"] >= (isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38') ? "style='color:tomato;background-color:white;'" : "style=''"?>>
             <td><?=$data["date"]?></td>
             <td <?=$data["value"] >= (isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38') ? "style='color:tomato;'" : "style=''"?>><?=number_format($data["value"], 2)?></td>
             <td style="">

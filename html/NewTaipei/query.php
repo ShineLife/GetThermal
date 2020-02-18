@@ -1,10 +1,18 @@
 <?php
-     include("sql.php");
-    $datas = $sql->query("SELECT `id`,`date`, max(`value`) as `value`, image FROM `temperature` GROUP BY `date` ORDER BY `id` DESC limit ". $_COOKIE["temperature_row"])->fetchAll();
+    include("sql.php");
+    if($_GET["status"] == "false")
+    {
+        $datas = $sql->query("SELECT `id`,`date`, max(`value`) as `value`, image FROM `temperature` GROUP BY `date` ORDER BY `id` DESC limit ". $_COOKIE["temperature_row"])->fetchAll();
+    }
+    else
+    {
+        $datas = $sql->query("SELECT `id`, `date`, max(`value`) as `value`, image FROM `temperature` where `value` >= '" . (isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38') . "' and `value` < 42 GROUP BY `date` ORDER BY `id` DESC")->fetchAll();
+    }
+    
     foreach($datas as $data) {
         $data["value"] = floatval($data["value"]) + floatval(isset($_COOKIE["temperature_gain"]) ? $_COOKIE["temperature_gain"] : '0');
     ?>
-        <tr>
+         <tr <?=$data["value"] >= (isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38') ? "style='color:tomato;background-color:white;'" : "style=''"?>>
             <td><?=$data["date"]?></td>
             <td <?=$data["value"] >= (isset($_COOKIE["max_temperature"]) ? $_COOKIE["max_temperature"] : '38') ? "style='color:tomato;'" : "style=''"?>><?=number_format($data["value"], 2)?></td>
             <td style="">

@@ -17,6 +17,7 @@
             setcookie("max_temperature", 38);
             setcookie("temperature_gain", 0);
             setcookie("temperature_row", 5);
+            $_SESSION["validate"] = false;
     ?>
     <style>
         #init {
@@ -155,7 +156,7 @@
 }
     </style>
 </head>
-<body style="background-color:#3F3F3F!important;" onload="init()">
+<body style="background-color:#3F3F3F!important;">
     <div class="modal fade-modal" id="123" tabindex="-1" role="dialog">
         <div class="modal-dialog" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 90%;" role="document">
             <div class="modal-content">
@@ -217,16 +218,10 @@
                     </div>
                     <div class="row">
                         <div class="input-group justify-content-center">
-                            <?php
-                            if(!(isset($_SESSION["validate"]) && $_SESSION["validate"])) {
-                                ?>
-                                <input type="text" name="" class="p-2" placeholder="輸入密碼" id="sendtext">
-                                <div class="input-group-append">
-                                    <input type="button" id="sendbutton" value="進入進階模式" class="btn btn-outline-light">
-                                </div>
-                                <?php
-                            }
-                            ?>
+                            <input type="text" name="" class="p-2" placeholder="輸入密碼" id="sendtext">
+                            <div class="input-group-append">
+                                <input type="button" id="sendbutton" value="進階模式" class="btn btn-outline-light">
+                            </div>
                             <div class="ml-3 mt-3 ">
                                 <label style="margin-top: 5px;">
                                     <input class="btn-toggle checki" type="checkbox">
@@ -265,7 +260,9 @@
     <script>
         let audio;
         let opening = false;
-        let hotdetail = false;
+        let passwordval = false;
+        let lastHot = true;
+        let warning = true;
         function init(){
             audio = document.getElementById("audioi");
             audio.addEventListener('ended', loopAudio, false);
@@ -287,39 +284,36 @@
                 opening = true;
             })
             setInterval(() => {
-                if(opening)
+                if(opening && warning)
                 {
-                    if(hotdetail)
-                    {
-                        $.get("query2.php", 
-                        function(data) {
+                    console.log($(".checki").prop("checked"));
+                    $.ajax({
+                        url:"query.php",
+                        async:true,
+                        data:{
+                            status:(($(".checki").prop("checked")) ? $(".checki").prop("checked") : false)
+                        },
+                        success:function(data) {
                             $("tbody").html(data);
-                            console.log(hotdetail);
-                        })
-                    }
-                    else
-                    {
-                        $.get("query.php", 
-                        function(data) {
-                            $("tbody").html(data);
-                            console.log(hotdetail);
-                        })
-                    }
-                    $.get("send.php", 
-                    function(data) {
-                        if(data == "1")
-                        {
-                            $("#modal2").show();
-                            $("#disbutton").trigger("click");
-                            if(audio.paused)
-                                audio.play();
+                            lastHot = $(".checki").prop("checked");
                         }
                     })
                 }
-            }, 500);
-            $(".checki").change(function(){
-                hotdetail = $(".checki").prop("checked");
-            })
+            }, 1000);
+            setInterval(()=>{
+                $.get("send.php", 
+                function(data) {
+                    if(data == "1" && warning)
+                    {
+                        $("#modal2").show();
+                        $("#disbutton").trigger("click");
+                        audio.currentTime = 0;
+                        warning = false;
+                        if(audio.paused)
+                            audio.play();
+                    }
+                })   
+            }, 300);
             $("#max_change").click(function(){
                 $.get("change1.php", {value: $("#max_temperature").val()});
             })
@@ -334,6 +328,7 @@
             })
             $('#closeModal').click(function (e) {
                 $("#modal2").hide();
+                warning = false;
                 play = true;
                 audio.pause();
             })
